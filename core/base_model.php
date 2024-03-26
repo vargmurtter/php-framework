@@ -1,4 +1,6 @@
 <?php
+require_once "core/db.php";
+
 
 enum SqlOrderType: string {
     case ASC = "ASC";
@@ -27,11 +29,34 @@ class BaseModel {
         unset($vars['db']);
 
         $field_names = array_keys($vars);
-        $fields = implode(",", $field_names);
-        $values = implode("', '", $vars);
+        $correct_names = [];
+        foreach ($field_names as $field)
+            $correct_names[] = "`$field`";
+        $fields = implode(",", $correct_names);
+        $correct_values = [];
+        foreach ($vars as $value){
+            if ($value === null) {
+                $correct_values[] = "NULL";
+            }
+            elseif ($value instanceof int) 
+                $correct_values[] = "$value";
+            elseif ($value instanceof string) {
+                $value = htmlentities($value, ENT_QUOTES, "UTF-8");
+                $correct_values[] = "'$value'";
+            }
+            else {
+                $value = htmlentities($value, ENT_QUOTES, "UTF-8");
+                $correct_values[] = "'$value'";
+            }
+        }
+        $values = implode(", ", $correct_values);
+
         $table_name = $this->get_table_name();
 
-        $sql = "INSERT INTO $table_name ($fields) VALUES ('$values')";
+        $sql = "INSERT INTO $table_name ($fields) VALUES ($values)";
+
+        // print_r($sql);
+
         if ($this->db->query($sql) === TRUE) {
             $this->id = $this->db->insert_id;
         }
@@ -45,6 +70,7 @@ class BaseModel {
 
         $params = "";
         foreach ($vars as $key => $value) {
+            $value = htmlentities($value, ENT_QUOTES, "UTF-8");
             $params .= "$key='$value', ";
         }
         $params = rtrim($params, ', ');
@@ -76,7 +102,8 @@ class BaseModel {
         string|null $condition = null, 
         string|null $order_field = null, 
         SqlOrderType $order_type = SqlOrderType::ASC,
-        int|null $limit = null
+        int|null $limit = null,
+        int|null $offset = null
     ): array 
     {
         global $_db;
@@ -88,6 +115,10 @@ class BaseModel {
         if ($condition != null) $sql .= " WHERE $condition";
         if ($order_field != null) $sql .= " ORDER BY $order_field $sort";
         if ($limit != null) $sql .= " LIMIT $limit";
+        if ($offset != null) $sql .= " OFFSET $offset";
+
+        // print_r($sql);
+        // echo "<br>";
 
         $result = $_db->query($sql);
         $objects = [];
@@ -109,7 +140,9 @@ class BaseModel {
     /**
      * @return static
      */
-    public static function select_one(string|null $condition = null): static 
+    public static function select_one(
+        string|null $condition = null
+    ): static|null
     {
         $class_name = get_called_class();
         $objs = $class_name::select_many(condition: $condition, limit: 1);
@@ -120,7 +153,7 @@ class BaseModel {
     /**
      * @return static[]
      */
-    public static function all(): array 
+    public static function all(): array
     {
         $class_name = get_called_class();
         $objs = $class_name::select_many();
@@ -130,12 +163,11 @@ class BaseModel {
     /**
      * @return static
      */
-    public static function get(int $id): static|null
+    public static function get(int|string $id): static|null
     {
         $class_name = get_called_class();
-        $objs = $class_name::select_many(condition: "id = $id", limit: 1);
-        if (array_key_exists(0, $objs)) return $objs[0];
-        else return null;
+        $obj = $class_name::select_one(condition: "id = $id");
+        return $obj;
     }
 
 }

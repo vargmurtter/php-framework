@@ -1,18 +1,20 @@
-<?php
-require_once "core/db.php";
+<?php 
 require_once "core/base_model.php";
 
 
-class Blog extends BaseModel
+class Article extends BaseModel
 {
+    const TABLE_NAME = "articles";
+
     function __construct(
         public string $title,
         public string $description, 
         public string $text, 
-        public int $author_id
-    ) { parent::__construct(); }
+        public string $creation_date
+    ) 
+    { parent::__construct(); }
 
-    const TABLE_NAME = "blog";
+    
 }
 
 ?>
