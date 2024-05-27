@@ -1,7 +1,7 @@
 <?php
 define("PROJECT_ROOT", __DIR__);
 define("APP_NAME", "Sample Blog");
-define("APP_URL", "http://sample-blog.local/");
+define("APP_URL", "http://bubble-framework.local/");
 define("TEMPLATE_DIR", "/templates/");
 define("SECRET", "p2ldCYb6RcL43q0rVcS5HaCVQWrmpk");
 
