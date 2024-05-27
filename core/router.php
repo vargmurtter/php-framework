@@ -1,31 +1,47 @@
 <?php
 
-class Router
-{
-    private string $default_key;
-    private array $routes = array();
+class Router{
+		
+    private string $defaultView = "home";
+    private	string $defaultAction = "Index";
+    
+    public $uriStr;
+    
+    public function route() {
+        $url = $_SERVER["REQUEST_URI"];
+        $url = preg_replace("/\?.*/", "", $url);
+        $url = explode("/", $url);
+        $this->uriStr = $url;
 
-    function __construct(string $default_key = "home")
-    {
-        $this->default_key = $default_key;
-    }
+        if(empty($url[1]))
+            $view = $this->defaultView;
+        else
+            $view = $url[1];
+        
+        if(empty($url[2]))
+            $action = $this->defaultAction;
+        else
+            $action = ucfirst($url[2]);
+        
+        $view_file_name = $view."View";
+        $view_class_name = ucfirst($view)."View";
+        $action = "action".$action;
+        
+        if(file_exists("views/".$view_file_name.".php")){
+            require_once "views/".$view_file_name.".php";
+            $view = new $view_class_name;
 
-    public function bind(string|null $uri, callable $view_method): void 
-    {
-        $this->routes[$uri] = $view_method;
-    }
-
-    public function route(): void 
-    {
-        $request_uri = $_SERVER['REQUEST_URI'];
-        $request = mb_split('/', $request_uri);
-        $key = $request[1];
-        if (empty($key)) $key = $this->default_key;
-        $params = array_slice($request, 2);
-        if (!array_key_exists($key, $this->routes)) {
-            $this->routes[null]($params);
-        } else {
-            $this->routes[$key]($params);
+            if(method_exists($view, $action)){
+                $view->$action();
+            }else{
+                require_once "views/unfoundView.php";
+                $nfv = new UnfoundView();
+                $nfv->actionIndex();
+            }
+        }else{
+            require_once "views/unfoundView.php";
+            $nfv = new UnfoundView();
+            $nfv->actionIndex();
         }
     }
 }

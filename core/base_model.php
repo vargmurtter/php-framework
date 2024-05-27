@@ -34,13 +34,15 @@ class BaseModel {
             $correct_names[] = "`$field`";
         $fields = implode(",", $correct_names);
         $correct_values = [];
+        // print_r($vars);
         foreach ($vars as $value){
             if ($value === null) {
                 $correct_values[] = "NULL";
             }
-            elseif ($value instanceof int) 
+            elseif (is_int($value)) {
                 $correct_values[] = "$value";
-            elseif ($value instanceof string) {
+            }
+            elseif (is_string($value)) {
                 $value = htmlentities($value, ENT_QUOTES, "UTF-8");
                 $correct_values[] = "'$value'";
             }
