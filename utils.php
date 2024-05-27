@@ -77,7 +77,7 @@ class Utils
         return $ip;
     }
 
-    public static function get_static(string $path) 
+    public static function get_static_url(string $path) 
     {
         return APP_URL . $path . "?u=" . uniqid();
     }

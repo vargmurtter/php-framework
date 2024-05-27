@@ -13,7 +13,7 @@ class HomeView
         );
         
         $tpl = new Template(TEMPLATE_DIR, "base.html");
-        $tpl->render("index.html", ['articles' => $articles]);
+        $tpl->render("index.html", ['title' => 'Home', 'articles' => $articles]);
     }
 }
 

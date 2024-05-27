@@ -32,6 +32,7 @@ class ContactView
         $tpl = new Template(TEMPLATE_DIR, "base.html");
 
         $data = [
+            "title" => "Contact",
             "success_message" => $success_message,
             "error_message" => $error_message,
         ];
